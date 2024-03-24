@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>godsend</title>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #editor {
+        display: block;
+        width: 50vw;
+        height: 80vh;
+        margin: 10vh auto 10vh auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div contenteditable id="editor"></div>
+    <script src="diff_match_patch.min.js"></script>
+    <script>
+      const searchParams = new URLSearchParams(window.location.search);
+      const id = searchParams.get("id");
+      const username = searchParams.get("username");
+
+      const wsc = new WebSocket(
+        `ws://localhost:3000/?username=${username}&id=${id}`
+      );
+
+      wsc.onopen = function () {};
+
+      let editor = document.getElementById("editor");
+      // editor.onblur = onEdit;
+      editor.onkeyup = onEdit;
+      editor.onpaste = onEdit;
+      editor.oncopy = onEdit;
+      editor.oncut = onEdit;
+      // editor.onmouseup = onEdit;
+
+      let dmp = new diff_match_patch();
+      let previousContent = "";
+
+      wsc.onmessage = function (data) {
+        const message = JSON.parse(data.data);
+        console.log(message);
+
+        let content = dmp.patch_apply(
+          dmp.patch_make(editor.innerHTML, message),
+          editor.innerHTML
+        )[0];
+
+        editor.innerHTML = content;
+        previousContent = content;
+      };
+
+      function onEdit(e) {
+        const content = e.target.innerHTML;
+
+        let diff = dmp.diff_main(previousContent, content);
+        console.log(diff);
+        wsc.send(JSON.stringify(diff));
+
+        previousContent = e.target.innerHTML;
+      }
+    </script>
+  </body>
+</html>

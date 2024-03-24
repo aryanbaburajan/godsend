@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>godsend</title>
+  </head>
+  <body>
+    <h1>godsend</h1>
+    <a id="room-link">open room</a>
+    <script>
+      let roomLink = document.getElementById("room-link");
+
+      function uuidv4() {
+        return "1000-1000-4000-8000".replace(/[018]/g, (c) =>
+          (
+            c ^
+            (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+          ).toString(16)
+        );
+      }
+
+      roomLink.href = "app?username=aryanbaburajan&id=" + uuidv4();
+    </script>
+  </body>
+</html>
